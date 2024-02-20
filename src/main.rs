@@ -1,4 +1,19 @@
-use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy::{
+    input::{
+        keyboard::{Key, KeyboardInput},
+        InputPlugin,
+    },
+    prelude::*,
+    render::camera::ScalingMode,
+};
+use components::velocity::Velocity;
+use entities::player::Player;
+
+use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
+
+pub mod components;
+pub mod entities;
+pub mod systems;
 
 fn main() {
     println!("Hello, world?!");
@@ -6,11 +21,21 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 prevent_default_event_handling: false,
+                mode: bevy::window::WindowMode::Windowed,
                 ..default()
             }),
             ..default()
         }))
-        .add_systems(Startup, (setup, spawn_player))
+        .add_systems(Startup, (setup, entities::player::spawn_player))
+        .add_systems(
+            Update,
+            (
+                move_player,
+                bevy::window::close_on_esc,
+                (apply_gravity, apply_velocity).chain(),
+                entities::pipe::spawn_pipe,
+            ),
+        )
         .run();
 }
 
@@ -20,27 +45,16 @@ fn setup(mut commands: Commands) {
     commands.spawn(camera_bundle);
 }
 
-#[derive(Component)]
-struct Player;
-
-fn spawn_player(mut commands: Commands) {
-    commands.spawn((
-        Player,
-        SpriteBundle {
-            sprite: Sprite {
-                color: Color::rgb(0.0, 1.0, 0.0),
-                custom_size: Some(Vec2::new(1.0, 2.0)),
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-    ));
-}
-
 fn move_player(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
-    mut query: Query<&mut Transform, With<Player>>,
+    mut players: Query<&mut Velocity, With<Player>>,
 ) {
-    
+    if keyboard_input.any_just_pressed([KeyCode::Space, KeyCode::ArrowUp]) {
+        println!("pressed");
+
+        for mut velocity in &mut players {
+            velocity.y = 7.0;
+        }
+    }
 }
