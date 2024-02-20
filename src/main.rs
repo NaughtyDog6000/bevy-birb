@@ -1,3 +1,6 @@
+use crate::systems::display_fps_system::{fps_text_update_system, setup_fps_counter};
+use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
+use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::{
     input::{
         keyboard::{Key, KeyboardInput},
@@ -9,14 +12,11 @@ use bevy::{
 use components::velocity::Velocity;
 use entities::player::Player;
 
-use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
-
 pub mod components;
 pub mod entities;
 pub mod systems;
 
 fn main() {
-    println!("Hello, world?!");
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -26,7 +26,11 @@ fn main() {
             }),
             ..default()
         }))
-        .add_systems(Startup, (setup, entities::player::spawn_player))
+        .add_plugins((FrameTimeDiagnosticsPlugin::default(),))
+        .add_systems(
+            Startup,
+            (setup, setup_fps_counter, entities::player::spawn_player),
+        )
         .add_systems(
             Update,
             (
@@ -34,6 +38,7 @@ fn main() {
                 bevy::window::close_on_esc,
                 (apply_gravity, apply_velocity).chain(),
                 entities::pipe::spawn_pipe,
+                fps_text_update_system,
             ),
         )
         .run();
