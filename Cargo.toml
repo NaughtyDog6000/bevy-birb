@@ -3,14 +3,16 @@ name = "bevy_birb"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+resolver = "2"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 bevy = "0.13.0"
 
 
-[target.wasm32-unknown-unknown]
-runner = "wasm-server-runner"
+# [target.wasm32-unknown-unknown]
+# runner = "wasm-server-runner"
 
-[build]
-target = "wasm32-unknown-unknown"
+# [build]
+# target = "wasm32-unknown-unknown"
