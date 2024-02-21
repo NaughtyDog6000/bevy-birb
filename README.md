@@ -6,6 +6,8 @@ wasm-bindgen --no-typescript --target web --out-dir ./out/ --out-name "bevy_birb
 
 cargo watch -cx run
 
+cargo watch -cx "run --target wasm32-unknown-unknown"
+
 ## TODO
 
 - lose on out of bounds
