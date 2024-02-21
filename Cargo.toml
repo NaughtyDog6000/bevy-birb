@@ -8,5 +8,5 @@ resolver = "2"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.13.0"
+bevy = { version = "0.13.0", default-features = true }
 bevy-persistent = { version = "0.5.0", features = ["bincode", "json"] }

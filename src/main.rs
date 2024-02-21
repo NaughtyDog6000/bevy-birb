@@ -1,18 +1,11 @@
 use crate::systems::display_fps_system::{fps_text_update_system, setup_fps_counter};
 use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::window::WindowMode;
-use bevy::{
-    input::{
-        keyboard::{Key, KeyboardInput},
-        InputPlugin,
-    },
-    prelude::*,
-    render::camera::ScalingMode,
-};
+use bevy::{prelude::*, render::camera::ScalingMode};
 use components::velocity::Velocity;
 use entities::player::Player;
-use systems::pipes_system::{self, SpawnTimer};
+use systems::pipes_system::SpawnTimer;
 
 pub mod components;
 pub mod entities;
@@ -47,7 +40,7 @@ fn main() {
                 fps_text_update_system,
                 toggle_fullscreen_system,
                 systems::pipes_system::spawn_pipes,
-                log_position,
+                // log_position,
             ),
         )
         .run();
@@ -79,10 +72,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn move_player(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    time: Res<Time>,
+    touch_inputs: Res<Touches>,
+    _time: Res<Time>,
     mut players: Query<&mut Velocity, With<Player>>,
 ) {
-    if keyboard_input.any_just_pressed([KeyCode::Space, KeyCode::ArrowUp]) {
+    if keyboard_input.any_just_pressed([KeyCode::Space, KeyCode::ArrowUp])
+        | touch_inputs.any_just_pressed()
+    {
         println!("pressed");
 
         for mut velocity in &mut players {
@@ -92,8 +88,8 @@ fn move_player(
 }
 
 fn toggle_fullscreen_system(
-    mut commands: Commands,
-    mut windows: Query<(&mut Window)>,
+    _commands: Commands,
+    mut windows: Query<&mut Window>,
     input: Res<ButtonInput<KeyCode>>,
 ) {
     let mut window = windows.single_mut();
@@ -107,13 +103,14 @@ fn toggle_fullscreen_system(
     }
 }
 
+#[allow(dead_code)]
 fn log_position(
     camera_query: Query<(&Transform, &OrthographicProjection), With<Camera>>,
     windows: Query<&Window>,
 ) {
     let (transform, projection) = camera_query.single();
 
-    let Some(cursor_position) = windows.single().cursor_position() else {
+    let Some(_cursor_position) = windows.single().cursor_position() else {
         return;
     };
     let cam_center = transform.translation;

@@ -20,7 +20,7 @@ pub fn spawn_pipe(mut commands: Commands, position_x: f32, position_y: f32) {
             parent.spawn(SpriteBundle {
                 sprite: Sprite {
                     color: Color::rgb(0.0, 1.0, 0.0),
-                    custom_size: Some(Vec2::new(1.5, 1.0)),
+                    custom_size: Some(Vec2::new(0.5, 1.0)),
                     ..Default::default()
                 },
                 transform: Transform::from_xyz(0.0, 1.0, 0.0),
@@ -29,7 +29,7 @@ pub fn spawn_pipe(mut commands: Commands, position_x: f32, position_y: f32) {
             parent.spawn(SpriteBundle {
                 sprite: Sprite {
                     color: Color::rgb(0.0, 0.0, 1.0),
-                    custom_size: Some(Vec2::new(1.5, 1.0)),
+                    custom_size: Some(Vec2::new(0.5, 1.0)),
                     ..Default::default()
                 },
                 transform: Transform::from_xyz(0.0, -1.0, 0.0),

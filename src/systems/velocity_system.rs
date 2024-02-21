@@ -1,7 +1,7 @@
-use bevy::ecs::{component::Component, system::Commands};
+
 use bevy::prelude::*;
 
-use crate::components::gravity::Gravity;
+
 use crate::components::velocity::Velocity;
 
 pub fn apply_velocity(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {

@@ -1,5 +1,5 @@
-use bevy::ecs::{component::Component, system::Commands};
-use bevy::prelude::*;
+use bevy::ecs::{component::Component};
+
 
 #[derive(Component)]
 pub struct Velocity {
