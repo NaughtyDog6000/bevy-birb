@@ -18,6 +18,7 @@ pub mod systems;
 
 fn main() {
     App::new()
+        .insert_resource(SpawnTimer(Timer::from_seconds(2.0, TimerMode::Repeating)))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 prevent_default_event_handling: false,
@@ -37,7 +38,6 @@ fn main() {
                 move_player,
                 bevy::window::close_on_esc,
                 (apply_gravity, apply_velocity).chain(),
-                entities::pipe::spawn_pipe,
                 fps_text_update_system,
             ),
         )

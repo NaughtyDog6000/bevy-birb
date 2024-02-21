@@ -20,5 +20,5 @@ pub fn spawn_player(mut commands: Commands) {
             },
             ..Default::default()
         },
-    ));
+    ))
 }
