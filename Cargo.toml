@@ -9,7 +9,3 @@ resolver = "2"
 
 [dependencies]
 bevy = "0.13.0"
-
-
-[profile.dev.package."*"]
-opt-level = 3

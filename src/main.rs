@@ -11,6 +11,7 @@ use bevy::{
 };
 use components::velocity::Velocity;
 use entities::player::Player;
+use systems::pipes_system::SpawnTimer;
 
 pub mod components;
 pub mod entities;
