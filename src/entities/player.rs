@@ -10,6 +10,7 @@ pub struct Player;
 pub fn spawn_player(mut commands: Commands) {
     commands.spawn((
         Player,
+        
         Velocity { x: 0.0, y: 0.0 },
         Gravity { x: 0.0, y: -10.0 },
         SpriteBundle {
