@@ -19,6 +19,7 @@ fn main() {
                 name: Some(String::from("Flappy Birb")),
                 mode: bevy::window::WindowMode::Windowed,
                 prevent_default_event_handling: true,
+                canvas: Some("#birb-canvas".into()),
                 transparent: true,
                 resizable: true,
 
