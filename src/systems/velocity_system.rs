@@ -1,6 +1,4 @@
-
 use bevy::prelude::*;
-
 
 use crate::components::velocity::Velocity;
 

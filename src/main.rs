@@ -11,9 +11,6 @@ pub mod components;
 pub mod entities;
 pub mod systems;
 
-#[derive(Event, Default)]
-pub struct CollisionEvent;
-
 fn main() {
     App::new()
         .insert_resource(SpawnTimer(Timer::from_seconds(2.0, TimerMode::Repeating)))
@@ -31,7 +28,6 @@ fn main() {
             ..default()
         }))
         .add_plugins((FrameTimeDiagnosticsPlugin::default(),))
-        .add_event::<CollisionEvent>();
         .add_systems(
             Startup,
             (setup, setup_fps_counter, entities::player::spawn_player),
@@ -45,6 +41,7 @@ fn main() {
                 fps_text_update_system,
                 toggle_fullscreen_system,
                 systems::pipes_system::spawn_pipes,
+                systems::collision_system::check_for_collisions_with_player,
                 // log_position,
             ),
         )
