@@ -5,12 +5,15 @@ use bevy::{
 
 use crate::{components::collider::Collider, entities::player::Player};
 
+#[derive(Event)]
+pub struct PlayerCollisionEvent(Entity);
+
 pub fn check_for_collisions_with_player(
-    mut commands: Commands,
-    mut query: Query<(&mut GlobalTransform, &Collider), Without<Player>>,
-    mut player_query: Query<(&Transform, &Collider), With<Player>>,
+    query: Query<(Entity, &GlobalTransform, &Collider), Without<Player>>,
+    player_query: Query<(&Transform, &Collider), With<Player>>,
+    mut player_collision_event: EventWriter<PlayerCollisionEvent>,
 ) {
-    let (player_transform, player_collider) = player_query.single_mut();
+    let (player_transform, player_collider) = player_query.single();
     let bounds = match player_collider {
         Collider::Circle { radius } => {
             BoundingCircle::new(player_transform.translation.truncate(), *radius)
@@ -20,7 +23,7 @@ pub fn check_for_collisions_with_player(
         }
     };
 
-    for (transform, collider) in query.iter() {
+    for (entity, transform, collider) in query.iter() {
         let overlap = match collider {
             Collider::Circle { radius } => bounds.intersects(&BoundingCircle::new(
                 transform.compute_transform().translation.xy(),
@@ -39,7 +42,7 @@ pub fn check_for_collisions_with_player(
                 "overlap with obj of transform: {}",
                 transform.compute_transform().translation.xy()
             );
+            player_collision_event.send(PlayerCollisionEvent(entity));
         }
     }
-    // add to collision Events
 }

@@ -1,7 +1,10 @@
+use std::default;
+
 use crate::systems::display_fps_system::{fps_text_update_system, setup_fps_counter};
 use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::window::WindowMode;
+use bevy::winit::WinitSettings;
 use bevy::{prelude::*, render::camera::ScalingMode};
 use components::velocity::Velocity;
 use entities::player::Player;
@@ -9,11 +12,23 @@ use systems::pipes_system::SpawnTimer;
 
 pub mod components;
 pub mod entities;
+pub mod state;
 pub mod systems;
+
+#[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
+pub enum GameState {
+    Playing,
+    GameOver,
+    #[default]
+    Menu,
+    Settings,
+}
 
 fn main() {
     App::new()
         .insert_resource(SpawnTimer(Timer::from_seconds(2.0, TimerMode::Repeating)))
+        .insert_resource(WinitSettings::game())
+        .init_state::<GameState>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 name: Some(String::from("Flappy Birb")),
@@ -27,7 +42,9 @@ fn main() {
             }),
             ..default()
         }))
+        .add_event::<systems::collision_system::PlayerCollisionEvent>()
         .add_plugins((FrameTimeDiagnosticsPlugin::default(),))
+        .add_systems(OnEnter(GameState::Playing), (setup))
         .add_systems(
             Startup,
             (setup, setup_fps_counter, entities::player::spawn_player),

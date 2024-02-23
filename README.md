@@ -17,3 +17,8 @@ cargo watch -cx "run --target wasm32-unknown-unknown"
 - Proc gen of pipes
 - score
 - upload to leaderboard / signin
+
+## DOING
+
+- Game state (Playing, Gamover, Menu, Settings)
+- Lose conditions

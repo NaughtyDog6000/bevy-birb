@@ -9,6 +9,9 @@ use crate::components::velocity::Velocity;
 #[derive(Component)]
 pub struct Player;
 
+const PLAYER_RADIUS: f32 = 0.5;
+const PLAYER_GRAVITY: f32 = -10.0;
+
 pub fn spawn_player(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -16,12 +19,19 @@ pub fn spawn_player(
 ) {
     commands.spawn((
         Player,
-        Collider::Circle { radius: 0.5 },
+        Collider::Circle {
+            radius: PLAYER_RADIUS,
+        },
         Velocity { x: 0.0, y: 0.0 },
-        Gravity { x: 0.0, y: -0.0 },
+        Gravity {
+            x: 0.0,
+            y: PLAYER_GRAVITY,
+        },
         MaterialMesh2dBundle {
             material: materials.add(Color::rgb(1.0, 0.0, 0.0)),
-            mesh: Mesh2dHandle(meshes.add(Circle { radius: 0.5 })),
+            mesh: Mesh2dHandle(meshes.add(Circle {
+                radius: PLAYER_RADIUS,
+            })),
             ..Default::default()
         },
     ));
