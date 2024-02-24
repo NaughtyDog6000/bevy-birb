@@ -7,7 +7,7 @@ use crate::components::velocity::Velocity;
 #[derive(Component)]
 pub struct Pipe;
 
-pub fn spawn_pipe(mut commands: Commands, position_x: f32, position_y: f32) {
+pub fn spawn_pipe(mut commands: Commands, _position_x: f32, _position_y: f32) {
     commands
         .spawn((
             SpatialBundle {

@@ -1,5 +1,3 @@
-use std::default;
-
 use crate::systems::display_fps_system::{fps_text_update_system, setup_fps_counter};
 use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
@@ -17,12 +15,15 @@ pub mod systems;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 pub enum GameState {
-    Playing,
-    GameOver,
     #[default]
+    InGame,
+    GameOver,
     Menu,
     Settings,
 }
+
+#[derive(Component)]
+pub struct MusicMarker;
 
 fn main() {
     App::new()
@@ -34,7 +35,7 @@ fn main() {
                 name: Some(String::from("Flappy Birb")),
                 mode: bevy::window::WindowMode::Windowed,
                 prevent_default_event_handling: true,
-                canvas: Some("#birb-canvas".into()),
+                // canvas: Some("#birb-canvas".into()),
                 transparent: true,
                 resizable: true,
 
@@ -44,23 +45,33 @@ fn main() {
         }))
         .add_event::<systems::collision_system::PlayerCollisionEvent>()
         .add_plugins((FrameTimeDiagnosticsPlugin::default(),))
-        .add_systems(OnEnter(GameState::Playing), (setup))
+        // systems that should run all the time regardless of state
         .add_systems(
-            Startup,
-            (setup, setup_fps_counter, entities::player::spawn_player),
+            Update,
+            (
+                bevy::window::close_on_esc,
+                fps_text_update_system,
+                toggle_fullscreen_system,
+            ),
         )
+        .add_systems(
+            OnEnter(GameState::InGame),
+            (reset_game, entities::player::spawn_player).chain(),
+        )
+        .add_systems(Startup, (setup, setup_fps_counter))
+        // systems that run when the game is such as movement and flap input
         .add_systems(
             Update,
             (
                 move_player,
-                bevy::window::close_on_esc,
                 (apply_gravity, apply_velocity).chain(),
-                fps_text_update_system,
-                toggle_fullscreen_system,
                 systems::pipes_system::spawn_pipes,
                 systems::collision_system::check_for_collisions_with_player,
-                // log_position,
-            ),
+                systems::lose_condition_system::check_for_lose_conditions,
+                toggle_music_playback,
+                log_position,
+            )
+                .run_if(in_state(GameState::InGame)),
         )
         .run();
 }
@@ -83,10 +94,22 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 
     // start playing background music immediately
-    commands.spawn(AudioBundle {
-        source: asset_server.load("audio/music/Monkeys-Spinning-Monkeys.ogg"),
-        ..Default::default()
-    });
+    commands.spawn((
+        AudioBundle {
+            source: asset_server.load("audio/music/Monkeys-Spinning-Monkeys.ogg"),
+            settings: PlaybackSettings {
+                paused: true,
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+        MusicMarker,
+    ));
+}
+
+fn reset_game() {
+    println!("reseting the game");
+    // TODO!
 }
 
 fn move_player(
@@ -102,6 +125,17 @@ fn move_player(
 
         for mut velocity in &mut players {
             velocity.y = 7.0;
+        }
+    }
+}
+
+fn toggle_music_playback(
+    input: Res<ButtonInput<KeyCode>>,
+    music_controller: Query<&AudioSink, With<MusicMarker>>,
+) {
+    if input.just_pressed(KeyCode::MediaPlayPause) {
+        if let Ok(sink) = music_controller.get_single() {
+            sink.toggle();
         }
     }
 }
@@ -124,7 +158,7 @@ fn toggle_fullscreen_system(
 
 #[allow(dead_code)]
 fn log_position(
-    camera_query: Query<(&Transform, &OrthographicProjection), With<Camera>>,
+    camera_query: Query<(&GlobalTransform, &OrthographicProjection), With<Camera>>,
     windows: Query<&Window>,
 ) {
     let (transform, projection) = camera_query.single();
@@ -132,7 +166,7 @@ fn log_position(
     let Some(_cursor_position) = windows.single().cursor_position() else {
         return;
     };
-    let cam_center = transform.translation;
+    let cam_center = transform.compute_transform().translation.xy();
     let cam_width = projection.area.width();
     let cam_height = projection.area.height();
 
