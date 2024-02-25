@@ -24,3 +24,7 @@ cargo watch -cx "run --target wasm32-unknown-unknown"
 
 - Game state (Playing, Gamover, Menu, Settings)
 - Lose conditions
+
+## bugs
+
+Investigate audio on wasm and how it causes fps issues
