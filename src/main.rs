@@ -1,3 +1,4 @@
+use crate::game_over_input::game_over_input;
 use crate::systems::display_fps_system::{fps_text_update_system, setup_fps_counter};
 use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
@@ -7,6 +8,8 @@ use bevy::{prelude::*, render::camera::ScalingMode};
 use components::velocity::Velocity;
 use entities::player::Player;
 use systems::pipes_system::SpawnTimer;
+use systems::player_actions::flap::player_flap;
+use systems::player_actions::{self, game_over_input};
 
 pub mod components;
 pub mod entities;
@@ -54,7 +57,7 @@ fn main() {
             (
                 bevy::window::close_on_esc,
                 fps_text_update_system,
-                toggle_fullscreen_system,
+                player_actions::toggle_fullscreen::toggle_fullscreen_system,
             ),
         )
         .add_systems(
@@ -72,12 +75,12 @@ fn main() {
         .add_systems(
             Update,
             (
-                move_player,
+                player_flap,
                 (apply_gravity, apply_velocity).chain(),
                 systems::pipes_system::spawn_pipes,
                 systems::collision_system::check_for_collisions_with_player,
                 systems::lose_condition_system::check_for_lose_conditions,
-                toggle_music_playback,
+                player_actions::audio_playback::toggle_music_playback,
                 // log_position,
             )
                 .run_if(in_state(GameState::InGame)),
@@ -139,62 +142,6 @@ fn reset_game(
     println!("reseting the game");
     for entity in &entites {
         commands.entity(entity).despawn();
-    }
-}
-
-fn move_player(
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    touch_inputs: Res<Touches>,
-    _time: Res<Time>,
-    mut players: Query<&mut Velocity, With<Player>>,
-) {
-    if keyboard_input.any_just_pressed([KeyCode::Space, KeyCode::ArrowUp])
-        | touch_inputs.any_just_pressed()
-    {
-        println!("Flap!");
-
-        for mut velocity in &mut players {
-            velocity.y = 4.0;
-        }
-    }
-}
-
-fn game_over_input(
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    touch_inputs: Res<Touches>,
-    mut next_state: ResMut<NextState<GameState>>,
-) {
-    if keyboard_input.any_just_pressed([KeyCode::KeyR, KeyCode::Backspace])
-        | touch_inputs.any_just_pressed()
-    {
-        next_state.set(GameState::InGame);
-    }
-}
-
-fn toggle_music_playback(
-    input: Res<ButtonInput<KeyCode>>,
-    music_controller: Query<&AudioSink, With<MusicMarker>>,
-) {
-    if input.any_just_pressed([KeyCode::MediaPlayPause, KeyCode::KeyM]) {
-        if let Ok(sink) = music_controller.get_single() {
-            sink.toggle();
-        }
-    }
-}
-
-fn toggle_fullscreen_system(
-    _commands: Commands,
-    mut windows: Query<&mut Window>,
-    input: Res<ButtonInput<KeyCode>>,
-) {
-    let mut window = windows.single_mut();
-
-    if input.just_pressed(KeyCode::F11) {
-        if window.mode != WindowMode::BorderlessFullscreen {
-            window.mode = WindowMode::BorderlessFullscreen;
-        } else {
-            window.mode = WindowMode::Windowed;
-        }
     }
 }
 

@@ -26,7 +26,7 @@ const PIPE_HEIGHT: f32 = 10.0;
 /// spawn_pipe(commands, pipe_width, outlet_y, is_top);
 /// ```
 pub fn spawn_pipe(mut commands: Commands, pipe_width: f32, outlet_y: f32, is_top: bool) {
-    let mut spawn_height: f32 = 0.0;
+    let spawn_height: f32;
     if is_top {
         spawn_height = outlet_y + (PIPE_HEIGHT / 2.0)
     } else {
@@ -41,7 +41,7 @@ pub fn spawn_pipe(mut commands: Commands, pipe_width: f32, outlet_y: f32, is_top
                 custom_size: Some(Vec2::new(pipe_width, PIPE_HEIGHT)),
                 ..Default::default()
             },
-            transform: Transform::from_xyz(0.0, spawn_height, 0.0),
+            transform: Transform::from_xyz(X_SPAWN, spawn_height, 0.0),
             ..Default::default()
         },
         Collider::Rect {

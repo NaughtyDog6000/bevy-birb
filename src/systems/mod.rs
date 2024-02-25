@@ -1,3 +1,5 @@
+pub mod player_actions;
+
 pub mod collision_system;
 pub mod display_fps_system;
 pub mod gravity_system;

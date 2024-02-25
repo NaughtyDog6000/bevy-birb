@@ -5,15 +5,17 @@ use bevy::prelude::*;
 #[derive(Resource)]
 pub struct SpawnTimer(pub Timer);
 
+const DESPAWN_PAST_X: f32 = -10.0;
+
 pub fn spawn_pipes(
     time: Res<Time>,
     mut spawn_timer: ResMut<SpawnTimer>,
     mut commands: Commands,
     pipes_query: Query<(Entity, &Transform), With<Pipe>>,
 ) {
-    // check if any pipes are far enough passed the sc
+    // check if any pipes are far enough passed the screen to despawn them so that we arent continuously increasing the number of entities in the world
     for (entity, transform) in pipes_query.iter() {
-        if transform.translation.x <= -1.0 {
+        if transform.translation.x <= DESPAWN_PAST_X {
             commands.entity(entity).despawn();
         }
     }
