@@ -28,6 +28,10 @@ pub fn spawn_player(
             y: PLAYER_GRAVITY,
         },
         MaterialMesh2dBundle {
+            transform: Transform {
+                translation: Vec3::new(-5.0, 0.0, 0.0),
+                ..Default::default()
+            },
             material: materials.add(Color::rgb(1.0, 0.0, 0.0)),
             mesh: Mesh2dHandle(meshes.add(Circle {
                 radius: PLAYER_RADIUS,

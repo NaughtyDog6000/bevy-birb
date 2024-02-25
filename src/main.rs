@@ -25,9 +25,12 @@ pub enum GameState {
 #[derive(Component)]
 pub struct MusicMarker;
 
+#[derive(Component)]
+pub struct DontDespawnOnRestart;
+
 fn main() {
     App::new()
-        .insert_resource(SpawnTimer(Timer::from_seconds(2.0, TimerMode::Repeating)))
+        .insert_resource(SpawnTimer(Timer::from_seconds(3.0, TimerMode::Repeating)))
         .insert_resource(WinitSettings::game())
         .init_state::<GameState>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -56,9 +59,15 @@ fn main() {
         )
         .add_systems(
             OnEnter(GameState::InGame),
-            (reset_game, entities::player::spawn_player).chain(),
+            (
+                reset_game,
+                entities::player::spawn_player,
+                setup_game_start,
+                setup_fps_counter,
+            )
+                .chain(),
         )
-        .add_systems(Startup, (setup, setup_fps_counter))
+        .add_systems(Startup, application_setup)
         // systems that run when the game is such as movement and flap input
         .add_systems(
             Update,
@@ -69,21 +78,19 @@ fn main() {
                 systems::collision_system::check_for_collisions_with_player,
                 systems::lose_condition_system::check_for_lose_conditions,
                 toggle_music_playback,
-                log_position,
+                // log_position,
             )
                 .run_if(in_state(GameState::InGame)),
+        )
+        // systems that run on game over state such as gameover_input
+        .add_systems(
+            Update,
+            (game_over_input).run_if(in_state(GameState::GameOver)),
         )
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let mut camera_bundle = Camera2dBundle::default();
-    camera_bundle.projection.scaling_mode = ScalingMode::Fixed {
-        width: 16.0,
-        height: 9.0,
-    };
-
-    commands.spawn(camera_bundle);
+fn setup_game_start(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(SpriteBundle {
         sprite: Sprite {
             custom_size: Some(Vec2::new(1.0, 1.0)),
@@ -92,6 +99,16 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         transform: Transform::from_xyz(-1.0, -1.0, 0.0),
         ..Default::default()
     });
+}
+
+fn application_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let mut camera_bundle = Camera2dBundle::default();
+    camera_bundle.projection.scaling_mode = ScalingMode::Fixed {
+        width: 16.0,
+        height: 9.0,
+    };
+
+    commands.spawn(camera_bundle);
 
     // start playing background music immediately
     commands.spawn((
@@ -104,12 +121,25 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..Default::default()
         },
         MusicMarker,
+        DontDespawnOnRestart,
     ));
 }
 
-fn reset_game() {
+fn reset_game(
+    mut commands: Commands,
+    entites: Query<
+        Entity,
+        (
+            Without<Camera>,
+            Without<Window>,
+            Without<DontDespawnOnRestart>,
+        ),
+    >,
+) {
     println!("reseting the game");
-    // TODO!
+    for entity in &entites {
+        commands.entity(entity).despawn();
+    }
 }
 
 fn move_player(
@@ -121,11 +151,23 @@ fn move_player(
     if keyboard_input.any_just_pressed([KeyCode::Space, KeyCode::ArrowUp])
         | touch_inputs.any_just_pressed()
     {
-        println!("pressed");
+        println!("Flap!");
 
         for mut velocity in &mut players {
-            velocity.y = 7.0;
+            velocity.y = 4.0;
         }
+    }
+}
+
+fn game_over_input(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    touch_inputs: Res<Touches>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    if keyboard_input.any_just_pressed([KeyCode::KeyR, KeyCode::Backspace])
+        | touch_inputs.any_just_pressed()
+    {
+        next_state.set(GameState::InGame);
     }
 }
 
@@ -133,7 +175,7 @@ fn toggle_music_playback(
     input: Res<ButtonInput<KeyCode>>,
     music_controller: Query<&AudioSink, With<MusicMarker>>,
 ) {
-    if input.just_pressed(KeyCode::MediaPlayPause) {
+    if input.any_just_pressed([KeyCode::MediaPlayPause, KeyCode::KeyM]) {
         if let Ok(sink) = music_controller.get_single() {
             sink.toggle();
         }

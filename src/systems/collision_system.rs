@@ -6,7 +6,7 @@ use bevy::{
 use crate::{components::collider::Collider, entities::player::Player};
 
 #[derive(Event)]
-pub struct PlayerCollisionEvent(Entity);
+pub struct PlayerCollisionEvent(pub Entity);
 
 pub fn check_for_collisions_with_player(
     query: Query<(Entity, &GlobalTransform, &Collider), Without<Player>>,
