@@ -7,12 +7,15 @@ use bevy::winit::WinitSettings;
 use bevy::{prelude::*, render::camera::ScalingMode};
 use components::velocity::Velocity;
 use entities::player::Player;
+use setup::application_setup;
 use systems::pipes_system::SpawnTimer;
 use systems::player_actions::flap::player_flap;
 use systems::player_actions::{self, game_over_input};
+use systems::score_system::GameScore;
 
 pub mod components;
 pub mod entities;
+pub mod setup;
 pub mod state;
 pub mod systems;
 
@@ -35,6 +38,7 @@ fn main() {
     App::new()
         .insert_resource(SpawnTimer(Timer::from_seconds(3.0, TimerMode::Repeating)))
         .insert_resource(WinitSettings::game())
+        .insert_resource(GameScore::default())
         .init_state::<GameState>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -80,6 +84,7 @@ fn main() {
                 systems::pipes_system::spawn_pipes,
                 systems::collision_system::check_for_collisions_with_player,
                 systems::lose_condition_system::check_for_lose_conditions,
+                systems::score_system::update_score,
                 player_actions::audio_playback::toggle_music_playback,
                 // log_position,
             )
@@ -104,30 +109,6 @@ fn setup_game_start(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn application_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let mut camera_bundle = Camera2dBundle::default();
-    camera_bundle.projection.scaling_mode = ScalingMode::Fixed {
-        width: 16.0,
-        height: 9.0,
-    };
-
-    commands.spawn(camera_bundle);
-
-    // start playing background music immediately
-    commands.spawn((
-        AudioBundle {
-            source: asset_server.load("audio/music/Monkeys-Spinning-Monkeys.ogg"),
-            settings: PlaybackSettings {
-                paused: true,
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-        MusicMarker,
-        DontDespawnOnRestart,
-    ));
-}
-
 fn reset_game(
     mut commands: Commands,
     entites: Query<
@@ -138,8 +119,13 @@ fn reset_game(
             Without<DontDespawnOnRestart>,
         ),
     >,
+    mut game_score: ResMut<GameScore>,
 ) {
+    println!("current score: {}", game_score.score);
+    *game_score = GameScore::default();
+
     println!("reseting the game");
+
     for entity in &entites {
         commands.entity(entity).despawn();
     }

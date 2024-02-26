@@ -28,3 +28,11 @@ cargo watch -cx "run --target wasm32-unknown-unknown"
 ## bugs
 
 Investigate audio on wasm and how it causes fps issues
+
+## Default Controls
+
+Space - Flap
+R - Restart
+Escape - Quit
+M - Toggle Audio Playback
+F11 - Toggle Fullscreen
