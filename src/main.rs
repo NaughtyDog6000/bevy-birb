@@ -57,6 +57,7 @@ fn main() {
             ..default()
         }))
         .add_event::<systems::collision_system::PlayerCollisionEvent>()
+        .add_event::<systems::score_system::AddScoreEvent>()
         .add_plugins((FrameTimeDiagnosticsPlugin::default(),))
         .add_systems(Startup, application_setup)
         // systems that should run all the time regardless of state
