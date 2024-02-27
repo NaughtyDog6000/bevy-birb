@@ -7,6 +7,7 @@ use bevy::winit::WinitSettings;
 use bevy::{prelude::*, render::camera::ScalingMode};
 use components::velocity::Velocity;
 use entities::player::Player;
+use rand::thread_rng;
 use setup::application_setup;
 use systems::game_over;
 use systems::pipes_system::SpawnTimer;
@@ -157,3 +158,8 @@ fn log_position(
         cam_center, cam_width, cam_height
     );
 }
+
+// #[allow(dead_code)]
+// fn test_rand() {
+//     let mut rng = thread_rng();
+// }

@@ -1,6 +1,7 @@
-use crate::entities::pipe::{spawn_pipe, Pipe};
+use crate::entities::pipe::{spawn_double_pipe, spawn_pipe, Pipe};
 use bevy::ecs::system::Commands;
 use bevy::prelude::*;
+use rand::{thread_rng, Rng};
 
 #[derive(Resource)]
 pub struct SpawnTimer(pub Timer);
@@ -22,6 +23,9 @@ pub fn spawn_pipes(
 
     // if sufficient time since the last spawn has passed, spawn another pipe
     if spawn_timer.0.tick(time.delta()).just_finished() {
-        spawn_pipe(commands, 2.0, -3.0, false);
+        let mut rng = thread_rng();
+
+        let gap_y = rng.gen_range(0..5) as f32;
+        spawn_double_pipe(&mut commands, 2.0, gap_y, 2.0);
     }
 }

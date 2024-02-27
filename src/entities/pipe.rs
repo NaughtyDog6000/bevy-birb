@@ -25,7 +25,7 @@ const PIPE_HEIGHT: f32 = 10.0;
 ///
 /// spawn_pipe(commands, pipe_width, outlet_y, is_top);
 /// ```
-pub fn spawn_pipe(mut commands: Commands, pipe_width: f32, outlet_y: f32, is_top: bool) {
+pub fn spawn_pipe(commands: &mut Commands, pipe_width: f32, outlet_y: f32, is_top: bool) {
     let spawn_height: f32;
     if is_top {
         spawn_height = outlet_y + (PIPE_HEIGHT / 2.0)
@@ -50,4 +50,14 @@ pub fn spawn_pipe(mut commands: Commands, pipe_width: f32, outlet_y: f32, is_top
         },
         Velocity { x: -1.5, y: 0.0 },
     ));
+}
+
+pub fn spawn_double_pipe(commands: &mut Commands, pipe_width: f32, gap_y: f32, gap_size: f32) {
+    // spawn top pipe
+    let top_outlet_y: f32 = gap_y + (gap_size / 2.0);
+    spawn_pipe(commands, pipe_width, top_outlet_y, true);
+
+    // spawn bottom pipe
+    let bottom_outlet_y: f32 = gap_y - (gap_size / 2.0);
+    spawn_pipe(commands, pipe_width, bottom_outlet_y, false);
 }
