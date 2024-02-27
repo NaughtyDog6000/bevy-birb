@@ -36,6 +36,6 @@ pub fn update_score(
 
     // println!("{}", game_score.score);
     for mut text in &mut score_text_query {
-        text.sections[1].value = format!("{0:.2}", game_score.game_start.elapsed_secs());
+        text.sections[1].value = format!("{0:.2}", game_score.game_start.elapsed_secs() * 2.0);
     }
 }
