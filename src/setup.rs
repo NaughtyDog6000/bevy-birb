@@ -4,6 +4,9 @@ use bevy::render::camera::ScalingMode;
 
 use crate::{DontDespawnOnRestart, MusicMarker};
 
+#[derive(Component)]
+pub struct ScoreMarker;
+
 pub fn application_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut camera_bundle = Camera2dBundle::default();
     camera_bundle.projection.scaling_mode = ScalingMode::Fixed {
@@ -59,5 +62,29 @@ pub fn application_setup(mut commands: Commands, asset_server: Res<AssetServer>)
             ..Default::default()
         }),
         DontDespawnOnRestart,
+    ));
+
+    commands.spawn((
+        TextBundle::from_sections([
+            TextSection::new(
+                "Score: ",
+                TextStyle {
+                    font_size: 40.0,
+                    ..Default::default()
+                },
+            ),
+            TextSection::from_style(TextStyle {
+                font_size: 50.0,
+                color: Color::GOLD,
+                ..Default::default()
+            }),
+        ])
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            left: Val::Percent(50.0),
+            ..Default::default()
+        }),
+        DontDespawnOnRestart,
+        ScoreMarker,
     ));
 }

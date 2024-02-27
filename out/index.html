@@ -4,18 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flappy Birb</title>
-    <script>
-      function resize_canvas() {
-        canvas = document.getElementById("birb-canvas");
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-    </script>
   </head>
-  <body onresize="resize_canvas()">
-    <canvas id="birb-canvas">Game Not loaded</canvas>
-
+  <body>
     <script type="module">
       import init from "./bevy_birb.js";
 

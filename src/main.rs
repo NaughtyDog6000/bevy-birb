@@ -8,6 +8,7 @@ use bevy::{prelude::*, render::camera::ScalingMode};
 use components::velocity::Velocity;
 use entities::player::Player;
 use setup::application_setup;
+use systems::game_over;
 use systems::pipes_system::SpawnTimer;
 use systems::player_actions::flap::player_flap;
 use systems::player_actions::{self, game_over_input};
@@ -55,6 +56,7 @@ fn main() {
         }))
         .add_event::<systems::collision_system::PlayerCollisionEvent>()
         .add_plugins((FrameTimeDiagnosticsPlugin::default(),))
+        .add_systems(Startup, application_setup)
         // systems that should run all the time regardless of state
         .add_systems(
             Update,
@@ -64,6 +66,7 @@ fn main() {
                 player_actions::toggle_fullscreen::toggle_fullscreen_system,
             ),
         )
+        // Systems that run when changing into the ingame state
         .add_systems(
             OnEnter(GameState::InGame),
             (
@@ -74,8 +77,7 @@ fn main() {
             )
                 .chain(),
         )
-        .add_systems(Startup, application_setup)
-        // systems that run when the game is such as movement and flap input
+        // systems that run when the in the ingame state
         .add_systems(
             Update,
             (
@@ -90,6 +92,10 @@ fn main() {
             )
                 .run_if(in_state(GameState::InGame)),
         )
+        .add_systems(
+            OnEnter(GameState::GameOver),
+            (state::on_enter_game_over::on_enter_gameover_state,).chain(),
+        )
         // systems that run on game over state such as gameover_input
         .add_systems(
             Update,
@@ -99,6 +105,7 @@ fn main() {
 }
 
 fn setup_game_start(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // spawn a cube which only exists for the lifetime of the game (is created at on begin gameplay)
     commands.spawn(SpriteBundle {
         sprite: Sprite {
             custom_size: Some(Vec2::new(1.0, 1.0)),

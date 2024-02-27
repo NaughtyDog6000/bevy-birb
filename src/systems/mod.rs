@@ -1,5 +1,8 @@
+// subfolders
+pub mod game_over;
 pub mod player_actions;
 
+// systems
 pub mod collision_system;
 pub mod display_fps_system;
 pub mod gravity_system;
