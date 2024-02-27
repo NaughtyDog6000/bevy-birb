@@ -16,6 +16,8 @@ pub fn spawn_pipes(
 ) {
     // check if any pipes are far enough passed the screen to despawn them so that we arent continuously increasing the number of entities in the world
     for (entity, transform) in pipes_query.iter() {
+        
+        
         if transform.translation.x <= DESPAWN_PAST_X {
             commands.entity(entity).despawn();
         }
