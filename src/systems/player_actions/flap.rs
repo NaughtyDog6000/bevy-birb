@@ -9,7 +9,7 @@ pub fn player_flap(
     touch_inputs: Res<Touches>,
     _time: Res<Time>,
     mut players: Query<&mut Velocity, With<Player>>,
-    mut add_score_event: EventWriter<AddScoreEvent>,
+    _add_score_event: EventWriter<AddScoreEvent>,
 ) {
     if keyboard_input.any_just_pressed([KeyCode::Space, KeyCode::ArrowUp])
         | touch_inputs.any_just_pressed()

@@ -2,15 +2,13 @@ use crate::game_over_input::game_over_input;
 use crate::systems::display_fps_system::{fps_text_update_system, setup_fps_counter};
 use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
-use bevy::time::Stopwatch;
-use bevy::window::WindowMode;
+
+use bevy::prelude::*;
 use bevy::winit::WinitSettings;
-use bevy::{prelude::*, render::camera::ScalingMode};
-use components::velocity::Velocity;
-use entities::player::Player;
-use rand::thread_rng;
+
 use setup::application_setup;
-use systems::game_over;
+
+use state::on_enter_playing::on_enter_play_state;
 use systems::pipes_system::SpawnTimer;
 use systems::player_actions::flap::player_flap;
 use systems::player_actions::{self, game_over_input};
@@ -58,7 +56,7 @@ fn main() {
         }))
         .add_event::<systems::collision_system::PlayerCollisionEvent>()
         .add_event::<systems::score_system::AddScoreEvent>()
-        .add_plugins((FrameTimeDiagnosticsPlugin::default(),))
+        .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_systems(Startup, application_setup)
         // systems that should run all the time regardless of state
         .add_systems(
@@ -74,8 +72,8 @@ fn main() {
             OnEnter(GameState::InGame),
             (
                 reset_game,
+                on_enter_play_state,
                 entities::player::spawn_player,
-                setup_game_start,
                 setup_fps_counter,
             )
                 .chain(),
@@ -105,18 +103,6 @@ fn main() {
             (game_over_input).run_if(in_state(GameState::GameOver)),
         )
         .run();
-}
-
-fn setup_game_start(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // spawn a cube which only exists for the lifetime of the game (is created at on begin gameplay)
-    commands.spawn(SpriteBundle {
-        sprite: Sprite {
-            custom_size: Some(Vec2::new(1.0, 1.0)),
-            ..Default::default()
-        },
-        transform: Transform::from_xyz(-1.0, -1.0, 0.0),
-        ..Default::default()
-    });
 }
 
 fn reset_game(

@@ -4,25 +4,33 @@ use bevy::prelude::*;
 pub fn on_enter_gameover_state(mut commands: Commands) {
     println!("Game Over");
 
-    commands.spawn(
-        (TextBundle::from_sections([TextSection::new(
-            "GAME OVER!",
-            TextStyle {
-                color: Color::RED,
-                font_size: 150.0,
+    commands
+        .spawn((NodeBundle {
+            style: Style {
+                height: Val::Percent(100.0),
+                width: Val::Percent(100.0),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
                 ..Default::default()
             },
-        )]))
-        .with_text_justify(JustifyText::Center)
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
-            ..Default::default()
-        }),
-    );
+            ..default()
+        },))
+        .with_children(|parent| {
+            parent.spawn((
+                TextBundle {
+                    text: Text::from_section(
+                        "GAME OVER!",
+                        TextStyle {
+                            color: Color::RED,
+                            font_size: 150.0,
+                            ..Default::default()
+                        },
+                    ),
+                    ..default()
+                },
+                Label,
+            ));
+        });
 
     return;
 }

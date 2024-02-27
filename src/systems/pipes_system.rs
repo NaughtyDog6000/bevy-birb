@@ -1,4 +1,4 @@
-use crate::entities::pipe::{spawn_double_pipe, spawn_pipe, Pipe};
+use crate::entities::pipe::{spawn_double_pipe, Pipe};
 use bevy::ecs::system::Commands;
 use bevy::prelude::*;
 use rand::{thread_rng, Rng};
@@ -12,7 +12,7 @@ const DESPAWN_PAST_X: f32 = -10.0;
 
 pub fn spawn_pipes(
     time: Res<Time>,
-    mut game_score: ResMut<GameScore>,
+    game_score: ResMut<GameScore>,
     mut spawn_timer: ResMut<SpawnTimer>,
     mut commands: Commands,
     pipes_query: Query<(Entity, &Transform), With<Pipe>>,
@@ -28,9 +28,9 @@ pub fn spawn_pipes(
     if spawn_timer.0.tick(time.delta()).just_finished() {
         let mut rng = thread_rng();
 
-        let gap_y = rng.gen_range(-5..5) as f32;
+        let gap_y = rng.gen_range(-3.5..3.5) as f32;
 
-        let hole_size: f32 = 4.0 - (game_score.game_time.elapsed_secs() * 0.2);
+        let hole_size: f32 = 4.0 - f32::min(game_score.game_time.elapsed_secs() * 0.02, 3.0);
         spawn_double_pipe(&mut commands, 1.0, gap_y, hole_size);
     }
 }
