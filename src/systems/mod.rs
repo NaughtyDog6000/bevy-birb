@@ -10,3 +10,5 @@ pub mod lose_condition_system;
 pub mod pipes_system;
 pub mod score_system;
 pub mod velocity_system;
+
+pub mod web_request;

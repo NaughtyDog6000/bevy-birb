@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_mod_reqwest::*;
 
 use crate::{
     components::velocity::Velocity, entities::player::Player, systems::score_system::AddScoreEvent,

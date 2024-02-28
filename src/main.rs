@@ -1,11 +1,14 @@
+use std::time::Duration;
+
 use crate::game_over_input::game_over_input;
 use crate::systems::display_fps_system::{fps_text_update_system, setup_fps_counter};
 use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 
 use bevy::prelude::*;
+use bevy::time::common_conditions::on_timer;
 use bevy::winit::WinitSettings;
-
+use bevy_mod_reqwest::*;
 use setup::application_setup;
 
 use state::on_enter_playing::on_enter_play_state;
@@ -13,6 +16,7 @@ use systems::pipes_system::SpawnTimer;
 use systems::player_actions::flap::player_flap;
 use systems::player_actions::{self, game_over_input};
 use systems::score_system::GameScore;
+use systems::web_request::{handle_events, Bored};
 
 pub mod components;
 pub mod entities;
@@ -54,9 +58,10 @@ fn main() {
             }),
             ..default()
         }))
+        .add_plugins(FrameTimeDiagnosticsPlugin::default())
+        .add_plugins(ReqwestPlugin::default())
         .add_event::<systems::collision_system::PlayerCollisionEvent>()
         .add_event::<systems::score_system::AddScoreEvent>()
-        .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_systems(Startup, application_setup)
         // systems that should run all the time regardless of state
         .add_systems(
@@ -102,6 +107,12 @@ fn main() {
             Update,
             (game_over_input).run_if(in_state(GameState::GameOver)),
         )
+        .add_systems(
+            Update,
+            systems::web_request::send_requests.run_if(on_timer(Duration::from_secs(2))),
+        )
+        .add_event::<Bored>()
+        .add_systems(Update, handle_events)
         .run();
 }
 
