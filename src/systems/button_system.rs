@@ -2,8 +2,7 @@ use bevy::prelude::*;
 
 use crate::components::action_button::ActionButton;
 
-use super::player_actions::actions::{ActionEvent, PlayerAction};
-//
+use super::player_actions::actions::ActionEvent;
 
 pub fn button_system(
     mut interaction_query: Query<
@@ -14,7 +13,7 @@ pub fn button_system(
     mut background_query: Query<&mut BackgroundColor>,
     mut player_action_event: EventWriter<ActionEvent>,
 ) {
-    for (interaction, children, entity, btn_action) in &mut interaction_query {
+    for (interaction, _children, entity, btn_action) in &mut interaction_query {
         // let mut text = text_query.get_mut(children[0]).unwrap();
         let mut background_colour = background_query.get_mut(entity).unwrap();
         match *interaction {

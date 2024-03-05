@@ -1,5 +1,3 @@
-use bevy::prelude::*;
-
 use bevy::ecs::event::Event;
 
 #[derive(Hash, Eq, PartialEq, Clone, Copy, Debug)]
