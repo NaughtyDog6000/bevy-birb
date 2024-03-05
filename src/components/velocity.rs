@@ -1,5 +1,4 @@
-use bevy::ecs::{component::Component};
-
+use bevy::ecs::component::Component;
 
 #[derive(Component)]
 pub struct Velocity {

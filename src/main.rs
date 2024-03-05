@@ -44,14 +44,12 @@ pub struct DontDespawnOnRestart;
 pub struct InputBindings(HashMap<PlayerAction, Vec<KeyCode>>);
 
 fn main() {
-    let input_bindings: InputBindings = InputBindings(HashMap::from([(
-        PlayerAction::Flap,
-        vec![KeyCode::Space, KeyCode::ArrowUp],
-    ),
-    ( 
-        PlayerAction::Restart,
-        vec![KeyCode::KeyR, KeyCode::Backspace]
-    )
+    let input_bindings: InputBindings = InputBindings(HashMap::from([
+        (PlayerAction::Flap, vec![KeyCode::Space, KeyCode::ArrowUp]),
+        (
+            PlayerAction::Restart,
+            vec![KeyCode::KeyR, KeyCode::Backspace],
+        ),
     ]));
 
     App::new()
@@ -117,12 +115,17 @@ fn main() {
         )
         .add_systems(
             OnEnter(GameState::GameOver),
-            (state::on_enter_game_over::on_enter_gameover_state, systems::game_over::end_of_game_results::end_of_game_results).chain(),
+            (
+                state::on_enter_game_over::on_enter_gameover_state,
+                systems::game_over::end_of_game_results::end_of_game_results,
+            )
+                .chain(),
         )
         // systems that run on game over state such as gameover_input
         .add_systems(
             Update,
-            (systems::game_over::game_over_input::game_over_input).run_if(in_state(GameState::GameOver)),
+            (systems::game_over::game_over_input::game_over_input)
+                .run_if(in_state(GameState::GameOver)),
         )
         .add_systems(
             Update,
