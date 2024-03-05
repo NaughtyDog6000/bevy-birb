@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use crate::game_over_input::game_over_input;
 use crate::systems::display_fps_system::{fps_text_update_system, setup_fps_counter};
 use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
@@ -14,9 +13,9 @@ use setup::application_setup;
 
 use state::on_enter_playing::on_enter_play_state;
 use systems::pipes_system::SpawnTimer;
+use systems::player_actions;
 use systems::player_actions::actions::PlayerAction;
 use systems::player_actions::flap::player_flap;
-use systems::player_actions::{self, game_over_input};
 use systems::score_system::GameScore;
 use systems::web_request::{handle_events, Bored};
 
@@ -48,7 +47,12 @@ fn main() {
     let input_bindings: InputBindings = InputBindings(HashMap::from([(
         PlayerAction::Flap,
         vec![KeyCode::Space, KeyCode::ArrowUp],
-    )]));
+    ),
+    ( 
+        PlayerAction::Restart,
+        vec![KeyCode::KeyR, KeyCode::Backspace]
+    )
+    ]));
 
     App::new()
         .insert_resource(SpawnTimer(Timer::from_seconds(3.0, TimerMode::Repeating)))
@@ -118,12 +122,12 @@ fn main() {
         // systems that run on game over state such as gameover_input
         .add_systems(
             Update,
-            (game_over_input).run_if(in_state(GameState::GameOver)),
+            (systems::game_over::game_over_input::game_over_input).run_if(in_state(GameState::GameOver)),
         )
         .add_systems(
             Update,
             systems::web_request::send_requests
-                .run_if(on_timer(Duration::from_secs(2)))
+                .run_if(on_timer(Duration::from_secs(20)))
                 .run_if(in_state(GameState::InGame)),
         )
         .add_event::<Bored>()

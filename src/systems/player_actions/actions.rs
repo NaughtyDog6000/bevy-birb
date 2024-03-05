@@ -5,7 +5,7 @@ use bevy::ecs::event::Event;
 
 use crate::InputBindings;
 
-#[derive(Hash, Eq, PartialEq, Debug)]
+#[derive(Hash, Eq, PartialEq, Clone, Copy, Debug)]
 pub enum PlayerAction {
     Flap,
     Restart,
