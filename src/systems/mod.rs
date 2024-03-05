@@ -12,3 +12,5 @@ pub mod score_system;
 pub mod velocity_system;
 
 pub mod web_request;
+
+pub mod button_system;

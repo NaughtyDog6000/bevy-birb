@@ -7,12 +7,14 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
+use bevy::utils::hashbrown::HashMap;
 use bevy::winit::WinitSettings;
 use bevy_mod_reqwest::*;
 use setup::application_setup;
 
 use state::on_enter_playing::on_enter_play_state;
 use systems::pipes_system::SpawnTimer;
+use systems::player_actions::actions::PlayerAction;
 use systems::player_actions::flap::player_flap;
 use systems::player_actions::{self, game_over_input};
 use systems::score_system::GameScore;
@@ -39,10 +41,19 @@ pub struct MusicMarker;
 #[derive(Component)]
 pub struct DontDespawnOnRestart;
 
+#[derive(Resource)]
+pub struct InputBindings(HashMap<PlayerAction, Vec<KeyCode>>);
+
 fn main() {
+    let input_bindings: InputBindings = InputBindings(HashMap::from([(
+        PlayerAction::Flap,
+        vec![KeyCode::Space, KeyCode::ArrowUp],
+    )]));
+
     App::new()
         .insert_resource(SpawnTimer(Timer::from_seconds(3.0, TimerMode::Repeating)))
         .insert_resource(WinitSettings::game())
+        .insert_resource(InputBindings::from(input_bindings))
         .insert_resource(GameScore::default())
         .init_state::<GameState>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -62,6 +73,7 @@ fn main() {
         .add_plugins(ReqwestPlugin::default())
         .add_event::<systems::collision_system::PlayerCollisionEvent>()
         .add_event::<systems::score_system::AddScoreEvent>()
+        .add_event::<systems::player_actions::actions::ActionEvent>()
         .add_systems(Startup, application_setup)
         // systems that should run all the time regardless of state
         .add_systems(
@@ -70,6 +82,7 @@ fn main() {
                 bevy::window::close_on_esc,
                 fps_text_update_system,
                 player_actions::toggle_fullscreen::toggle_fullscreen_system,
+                systems::button_system::button_system,
             ),
         )
         // Systems that run when changing into the ingame state
@@ -100,7 +113,7 @@ fn main() {
         )
         .add_systems(
             OnEnter(GameState::GameOver),
-            (state::on_enter_game_over::on_enter_gameover_state,).chain(),
+            (state::on_enter_game_over::on_enter_gameover_state, systems::game_over::end_of_game_results::end_of_game_results).chain(),
         )
         // systems that run on game over state such as gameover_input
         .add_systems(
@@ -109,7 +122,9 @@ fn main() {
         )
         .add_systems(
             Update,
-            systems::web_request::send_requests.run_if(on_timer(Duration::from_secs(2))),
+            systems::web_request::send_requests
+                .run_if(on_timer(Duration::from_secs(2)))
+                .run_if(in_state(GameState::InGame)),
         )
         .add_event::<Bored>()
         .add_systems(Update, handle_events)

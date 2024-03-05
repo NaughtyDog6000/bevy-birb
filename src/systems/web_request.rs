@@ -26,6 +26,13 @@ pub struct Bored {
     pub link: String,
 }
 
+#[derive(Deserialize, Debug, Event)]
+pub struct RootAPI {
+    pub time: u32,
+    pub method_sent: String,
+    pub response: String,
+}
+
 /// this is one way to automatically turn the responses into events, which is
 /// the prefered way, since it allows parallelism according to
 /// [example](https://github.com/aevyrie/bevy_eventlistener/blob/main/examples/event_listeners.rs)

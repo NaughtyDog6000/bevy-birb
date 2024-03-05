@@ -19,7 +19,7 @@ pub fn on_enter_gameover_state(mut commands: Commands) {
             parent.spawn((
                 TextBundle {
                     text: Text::from_section(
-                        "GAME OVER!",
+                        "GAME OVER!?",
                         TextStyle {
                             color: Color::RED,
                             font_size: 150.0,
