@@ -54,7 +54,10 @@ fn main() {
 
     App::new()
         .insert_resource(SpawnTimer(Timer::from_seconds(3.0, TimerMode::Repeating)))
-        .insert_resource(WinitSettings::game())
+        .insert_resource(WinitSettings {
+            focused_mode: bevy::winit::UpdateMode::Continuous,
+            unfocused_mode: bevy::winit::UpdateMode::Continuous,
+            })
         .insert_resource(InputBindings::from(input_bindings))
         .insert_resource(GameScore::default())
         .init_state::<GameState>()
@@ -63,7 +66,10 @@ fn main() {
                 name: Some(String::from("Flappy Birb")),
                 mode: bevy::window::WindowMode::Windowed,
                 prevent_default_event_handling: true,
-                // canvas: Some("#birb-canvas".into()),
+                
+                #[cfg(target_arch = "wasm32")]
+                canvas: Some("#birb-canvas".into()),
+                
                 transparent: true,
                 resizable: true,
 
