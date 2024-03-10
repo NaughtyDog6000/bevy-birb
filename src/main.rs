@@ -1,8 +1,8 @@
-use std::time::Duration;
-
 use crate::systems::display_fps_system::{fps_text_update_system, setup_fps_counter};
 use crate::systems::{gravity_system::apply_gravity, velocity_system::apply_velocity};
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+use bevy_egui::EguiPlugin;
+use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
@@ -28,14 +28,12 @@ pub mod systems;
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 pub enum GameState {
     #[default]
+    Menu,
     InGame,
     GameOver,
-    Menu,
+    Signin,
     Settings,
 }
-
-#[derive(Component)]
-pub struct MusicMarker;
 
 #[derive(Component)]
 pub struct DontDespawnOnRestart;
@@ -50,6 +48,12 @@ fn main() {
             PlayerAction::Restart,
             vec![KeyCode::KeyR, KeyCode::Backspace],
         ),
+        (PlayerAction::Quit, vec![KeyCode::F4, KeyCode::Delete]),
+        (PlayerAction::OpenMainMenu, vec![KeyCode::Escape]),
+        (
+            PlayerAction::ToggleMusic,
+            vec![KeyCode::AudioVolumeMute, KeyCode::KeyM],
+        ),
     ]));
 
     App::new()
@@ -57,19 +61,20 @@ fn main() {
         .insert_resource(WinitSettings {
             focused_mode: bevy::winit::UpdateMode::Continuous,
             unfocused_mode: bevy::winit::UpdateMode::Continuous,
-            })
+        })
         .insert_resource(InputBindings::from(input_bindings))
         .insert_resource(GameScore::default())
         .init_state::<GameState>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 name: Some(String::from("Flappy Birb")),
+                title: String::from("Flappy Birb"),
                 mode: bevy::window::WindowMode::Windowed,
                 prevent_default_event_handling: true,
-                
+
                 #[cfg(target_arch = "wasm32")]
                 canvas: Some("#birb-canvas".into()),
-                
+
                 transparent: true,
                 resizable: true,
 
@@ -87,10 +92,13 @@ fn main() {
         .add_systems(
             Update,
             (
-                bevy::window::close_on_esc,
+                // bevy::window::close_on_esc,
                 fps_text_update_system,
                 player_actions::toggle_fullscreen::toggle_fullscreen_system,
+                player_actions::actions::action_open_main_menu,
                 systems::button_system::button_system,
+                player_actions::quit::action_quit,
+                player_actions::audio_playback::toggle_music_playback,
             ),
         )
         // Systems that run when changing into the ingame state
@@ -104,7 +112,7 @@ fn main() {
             )
                 .chain(),
         )
-        // systems that run when the in the ingame state
+        // systems that run when Playing the game
         .add_systems(
             Update,
             (
@@ -114,10 +122,14 @@ fn main() {
                 systems::collision_system::check_for_collisions_with_player,
                 systems::lose_condition_system::check_for_lose_conditions,
                 systems::score_system::update_score,
-                player_actions::audio_playback::toggle_music_playback,
                 // log_position,
             )
                 .run_if(in_state(GameState::InGame)),
+        )
+        // Systems that run when in the Main Menu
+        .add_systems(
+            Update,
+            (systems::main_menu::main_menu_ui::draw_main_menu_ui).run_if(in_state(GameState::Menu)),
         )
         .add_systems(
             OnEnter(GameState::GameOver),
@@ -141,6 +153,8 @@ fn main() {
         )
         .add_event::<Bored>()
         .add_systems(Update, handle_events)
+        .add_plugins(EguiPlugin)
+        .insert_resource(systems::main_menu::main_menu_ui::MainMenuUIState {})
         .run();
 }
 
@@ -185,8 +199,3 @@ fn log_position(
         cam_center, cam_width, cam_height
     );
 }
-
-// #[allow(dead_code)]
-// fn test_rand() {
-//     let mut rng = thread_rng();
-// }

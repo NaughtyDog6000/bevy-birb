@@ -2,10 +2,13 @@ use bevy::ecs::system::Commands;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 
-use crate::{DontDespawnOnRestart, MusicMarker};
+use crate::DontDespawnOnRestart;
 
 #[derive(Component)]
 pub struct ScoreMarker;
+
+#[derive(Component)]
+pub struct MusicMarker;
 
 pub fn application_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut camera_bundle = Camera2dBundle::default();
@@ -31,11 +34,13 @@ pub fn application_setup(mut commands: Commands, asset_server: Res<AssetServer>)
     ));
 
     // TODO re-write as a vec of tupples containing key and action values which is turned into a string
+
     let text: String = "
     [Space]: Flap,
-    [Escape]: Exit Game,
+    [F4]: Exit Game,
+    [Escape]: Main Menu,
     [M]: Toggle Mute Audio,
-    [R]: Restart when dead,
+    [R]: Restart,
     [F11]: Toggle Fullscreen,
     "
     .to_string();
