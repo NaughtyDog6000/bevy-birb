@@ -1,9 +1,9 @@
-use crate::entities::pipe::{spawn_double_pipe, Pipe};
+use crate::entities::{pipe::{self, spawn_double_pipe, Pipe}, player::Player};
 use bevy::ecs::system::Commands;
 use bevy::prelude::*;
 use rand::{thread_rng, Rng};
 
-use super::score_system::GameScore;
+use super::score_system::{AddScoreEvent, GameScore};
 
 #[derive(Resource)]
 pub struct SpawnTimer(pub Timer);
@@ -15,10 +15,27 @@ pub fn spawn_pipes(
     game_score: ResMut<GameScore>,
     mut spawn_timer: ResMut<SpawnTimer>,
     mut commands: Commands,
-    pipes_query: Query<(Entity, &Transform), With<Pipe>>,
+    mut pipes_query: Query<(Entity, &Transform, &mut Pipe), With<Pipe>>,
+    player_query: Query<&Transform, With<Player>>,
+    mut score_add_event: EventWriter<AddScoreEvent>,
+
 ) {
+    let player_pos = player_query.single();
     // check if any pipes are far enough passed the screen to despawn them so that we arent continuously increasing the number of entities in the world
-    for (entity, transform) in pipes_query.iter() {
+    for (entity, transform, mut pipe) in pipes_query.iter_mut() {
+        // if the pipe isnt marked as passed the player yet, check if its further left than the player
+        if !pipe.passed_player {
+            if transform.translation.x <= player_pos.translation.x {
+                // add score 
+                // TODO due to there being two pipes (one above and one bellow) this ususally fires twice
+                score_add_event.send(AddScoreEvent(100));
+                // mark as passed
+                pipe.passed_player = true;
+
+            }
+        }
+
+
         if transform.translation.x <= DESPAWN_PAST_X {
             commands.entity(entity).despawn();
         }

@@ -19,11 +19,11 @@ Investigate audio on wasm and how it causes fps issues
 ## Default Controls
 
 Space - Flap
+
 R - Restart
+
 Escape - Quit
+
 M - Toggle Audio Playback
+
 F11 - Toggle Fullscreen
-
-## ignore
-
-cd Documents/files-to-serve-from-caddy/bevybirb

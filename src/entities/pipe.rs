@@ -5,7 +5,9 @@ use crate::components::collider::Collider;
 use crate::components::velocity::Velocity;
 
 #[derive(Component)]
-pub struct Pipe;
+pub struct Pipe  {
+    pub passed_player: bool,
+}
 
 const X_SPAWN: f32 = 10.0;
 const PIPE_HEIGHT: f32 = 10.0;
@@ -34,7 +36,9 @@ pub fn spawn_pipe(commands: &mut Commands, pipe_width: f32, outlet_y: f32, is_to
     }
 
     commands.spawn((
-        Pipe,
+        Pipe {
+            passed_player: false
+        },
         SpriteBundle {
             sprite: Sprite {
                 color: Color::rgb(0.0, 1.0, 0.0),

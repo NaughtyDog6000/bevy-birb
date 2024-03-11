@@ -43,7 +43,7 @@ pub fn update_score(
     for mut text in &mut score_text_query {
         text.sections[1].value = format!(
             "{0:.2}",
-            (game_score.score + (game_score.game_time.elapsed_secs()) as u32)
+            (game_score.score + (game_score.game_time.elapsed_secs() * 20.0) as u32)
         );
     }
 }
